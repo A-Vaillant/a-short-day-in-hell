@@ -1,33 +1,5 @@
 ::Shelf Browse
-<<set $mode = "shelf">>
-<<set _loc = { side: $side, position: $position, floor: $floor }>>
-<div id="shelf-view" class="mode-shelf">
-
-<p class="location-header"><<print setup.Library.describeLocation(_loc)>></p>
-
-<<set _COLS = 24>>
-<<set _ROWS = 8>>
-<<set _COUNT = _COLS * _ROWS>>
-
-<div class="shelf-grid">
-<<for _bi = 0; _bi < _COUNT; _bi++>>
-<<set _isHeld = $heldBook !== null && $heldBook.side === $side && $heldBook.position === $position && $heldBook.floor === $floor && $heldBook.bookIndex === _bi>>
-<<set _isTarget = $targetBook.side === $side && $targetBook.position === $position && $targetBook.floor === $floor && $targetBook.bookIndex === _bi>>
-<<set _rng = setup.PRNG.fork("spine:" + $side + ":" + $position + ":" + $floor + ":" + _bi)>>
-<<set _h = Math.floor(_rng.next() * 30)>>
-<<set _s = 15 + Math.floor(_rng.next() * 20)>>
-<<set _l = 12 + Math.floor(_rng.next() * 14)>>
-<<set _col = "hsl(" + _h + "," + _s + "%," + _l + "%)">>
-<<capture _bi, _col, _isHeld, _isTarget>><div class="book-spine<<if _isHeld>> held<</if>><<if _isTarget>> target-nearby<</if>>" style="background:<<print _col>>"><<link " " "Shelf Open Book">><<set $openBook = { side: $side, position: $position, floor: $floor, bookIndex: _bi }, $openPage = 0>><</link>></div><</capture>>
-<</for>>
-</div>
-
-<<if $heldBook !== null>>
-<p class="held-notice">Holding: <<print $heldBook.side === 0 ? "west" : "east">> §<<print $heldBook.position>> fl.<<print $heldBook.floor>> #<<print $heldBook.bookIndex + 1>></p>
-<</if>>
-
-<p class="key-hint">[Esc] back to corridor</p>
-</div>
+<<goto "Corridor">>
 
 
 ::Shelf Open Book
@@ -44,7 +16,8 @@
 
 <<if _isTarget>><p class="target-book-hint">Something about this book makes you stop.</p><</if>>
 
-<pre class="book-page"><<print _pageText>></pre>
+<pre class="book-page" id="book-page-content"></pre>
+<<script>>document.getElementById("book-page-content").textContent = State.temporary.pageText;<</script>>
 
 <<if _fragment !== null && _fragment.length > 6>>
 <p class="coherent-fragment">You notice: <em>"<<print _fragment.trim()>>"</em></p>
