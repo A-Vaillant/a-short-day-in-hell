@@ -35,6 +35,19 @@ A Short Stay in Hell
     // Survival stats
     setup.Survival.init();
 
+    // Debug: ?goto=PassageName deep-links to a passage directly
+    // Optional: ?openBook=side,position,floor,bookIndex pre-sets the open book
+    if (State.variables.debug) {
+        const go = params.get("goto");
+        if (go) Config.passages.start = go;
+        const ob = params.get("openBook");
+        if (ob) {
+            const [side, position, floor, bookIndex] = ob.split(",").map(Number);
+            State.variables.openBook = { side, position, floor, bookIndex };
+            State.variables.openPage = 0;
+        }
+    }
+
 })();
 <</script>>
 

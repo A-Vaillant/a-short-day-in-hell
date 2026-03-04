@@ -73,7 +73,7 @@
                     break;
                 case "r":
                     ev.preventDefault();
-                    Engine.play("Shelf Stub");
+                    Engine.play("Shelf Browse");
                     break;
                 case "i":
                     ev.preventDefault();

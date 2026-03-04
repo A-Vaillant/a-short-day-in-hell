@@ -25,6 +25,9 @@
 
         DIRS: core.DIRS,
         BOTTOM_FLOOR: core.BOTTOM_FLOOR,
+        BOOKS_PER_GALLERY: core.BOOKS_PER_GALLERY,
+        GALLERIES_PER_SEGMENT: core.GALLERIES_PER_SEGMENT,
+        isRestArea: core.isRestArea,
 
         debugSegment(side, position, floor) {
             const s = this.getSegment(side, position, floor);
