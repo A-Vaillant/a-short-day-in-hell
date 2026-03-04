@@ -478,5 +478,5 @@
         return w;
     }
 
-    window._SurvivalCore = { STAT_MAX, STAT_MIN, survivalDefaults, survivalApplyMove, survivalApplySleep, survivalApplyEat, survivalApplyDrink, survivalSeverity, survivalWarnings };
+    window._SurvivalCore = { STAT_MAX, STAT_MIN, defaultStats, applyMove, applySleep, applyEat, applyDrink, severity, getWarnings };
 }());

@@ -8,7 +8,7 @@
     setup.Survival = {
         /** Initialize stats on a new game (call from StoryInit). */
         init() {
-            const d = core.survivalDefaults();
+            const d = core.defaultStats();
             const v = State.variables;
             v.hunger     = d.hunger;
             v.thirst     = d.thirst;
@@ -20,7 +20,7 @@
         /** Apply a move/wait tick. Mutates State.variables in place. */
         onMove() {
             const v = State.variables;
-            const next = core.survivalApplyMove({
+            const next = core.applyMove({
                 hunger: v.hunger, thirst: v.thirst,
                 exhaustion: v.exhaustion, morale: v.morale, despairing: v.despairing,
             });
@@ -30,22 +30,22 @@
         /** Apply a sleep rest. Mutates State.variables in place. */
         onSleep() {
             const v = State.variables;
-            const next = core.survivalApplySleep({
+            const next = core.applySleep({
                 hunger: v.hunger, thirst: v.thirst,
                 exhaustion: v.exhaustion, morale: v.morale, despairing: v.despairing,
             });
             Object.assign(v, next);
         },
 
-        onEat()   { const v = State.variables; Object.assign(v, core.survivalApplyEat(v)); },
-        onDrink() { const v = State.variables; Object.assign(v, core.survivalApplyDrink(v)); },
+        onEat()   { const v = State.variables; Object.assign(v, core.applyEat(v)); },
+        onDrink() { const v = State.variables; Object.assign(v, core.applyDrink(v)); },
 
-        severity(val) { return core.survivalSeverity(val); },
+        severity(val) { return core.severity(val); },
 
         /** Returns array of warning strings for current state. */
         warnings() {
             const v = State.variables;
-            return core.survivalWarnings({
+            return core.getWarnings({
                 hunger: v.hunger, thirst: v.thirst,
                 exhaustion: v.exhaustion, morale: v.morale, despairing: v.despairing,
             });
