@@ -1,0 +1,327 @@
+/* A Short Stay in Hell — horror theme for SugarCube 2
+ * Palette: near-black bg, aged-paper text, rust/amber accents, dim green for features
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Share+Tech+Mono&display=swap');
+
+:root {
+    --bg:         #0a0906;
+    --bg-mid:     #120f0a;
+    --bg-surface: #1a1510;
+    --text:       #c8b89a;
+    --text-dim:   #7a6a56;
+    --accent:     #8b4513;   /* rust/saddle brown */
+    --accent-dim: #5a2d0c;
+    --found:      #4a7c59;   /* muted green — coherent text discovery */
+    --danger:     #7a1f1f;
+    --border:     #2a2018;
+    --font-body:  'IM Fell English', Georgia, serif;
+    --font-mono:  'Share Tech Mono', 'Courier New', monospace;
+}
+
+/* === BASE === */
+
+* { box-sizing: border-box; }
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+a, .link-internal {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent-dim);
+    transition: color 0.15s, border-color 0.15s;
+}
+a:hover, .link-internal:hover {
+    color: #c8783a;
+    border-bottom-color: #c8783a;
+}
+
+/* === BUTTONS === */
+
+button {
+    color: var(--text-dim);
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    letter-spacing: 0.05em;
+    padding: 0.3rem 0.8rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+button:hover {
+    color: var(--text);
+    border-color: var(--accent-dim);
+    background-color: var(--bg-mid);
+}
+button:disabled {
+    color: var(--text-dim);
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* === SUGARCUBE UI CHROME === */
+
+#ui-bar {
+    background-color: var(--bg-mid);
+    border-right: 1px solid var(--border);
+}
+#ui-bar-body { color: var(--text-dim); }
+#ui-bar hr { border-color: var(--border); }
+
+#ui-bar-toggle,
+#ui-bar-history [id|="history"] {
+    color: var(--text-dim);
+    border-color: var(--border);
+    background: transparent;
+}
+#ui-bar-toggle:hover,
+#ui-bar-history [id|="history"]:hover {
+    color: var(--text);
+    background-color: var(--bg-surface);
+    border-color: var(--accent-dim);
+}
+
+#story-title {
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: 1em;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+}
+
+#menu ul { border-color: var(--border); }
+#menu li:not(:first-child) { border-top-color: var(--border); }
+#menu li a { color: var(--text-dim); }
+#menu li a:hover { color: var(--text); background-color: var(--bg-surface); }
+
+/* === PASSAGE AREA === */
+
+#passages {
+    margin-left: 16em;
+    padding: 0;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.passage {
+    max-width: 640px;
+    width: 100%;
+    padding: 1.5rem 2rem 4rem;
+}
+
+/* === CORRIDOR VIEW === */
+
+.location-header {
+    font-family: var(--font-mono);
+    font-size: 0.75em;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 0 0 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+}
+
+#corridor-view p {
+    margin: 0 0 0.6rem;
+}
+/* SugarCube converts blank Twee lines to <br> — collapse them */
+#corridor-view br,
+.passage > br {
+    display: none;
+}
+/* But allow <br> inside paragraphs for intentional breaks */
+#corridor-view p br,
+#corridor-view pre br {
+    display: inline;
+}
+
+.dim-notice {
+    color: var(--text-dim);
+    font-style: italic;
+}
+
+.feature {
+    color: var(--found);
+    font-style: italic;
+}
+
+/* === MOVES & ACTIONS === */
+
+#moves, #actions {
+    margin-top: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+}
+
+#moves strong, #actions strong {
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.8em;
+    display: block;
+    margin-bottom: 0.4rem;
+}
+
+#moves a, #actions a {
+    border-bottom: none;
+    color: var(--text);
+    margin-right: 1.2rem;
+    padding: 0.15rem 0;
+}
+#moves a:hover, #actions a:hover {
+    color: #c8783a;
+}
+
+/* Keyboard hint — subtle, next to move links */
+#moves a::before { content: '['; color: var(--text-dim); }
+#moves a::after  { content: ']'; color: var(--text-dim); }
+
+#actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+/* === STATUS BARS (Chapel Meter macros) === */
+
+.stat-bars {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.75em;
+    color: var(--text-dim);
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    width: 7em;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+}
+
+/* Chapel meter macro targets */
+.macro-meter {
+    height: 6px;
+    flex: 1;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 0;
+}
+.macro-meter-bar {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.4s ease;
+}
+.macro-meter-bar.morale { background: #6a8fbf; }
+.macro-meter-bar.hunger { background: #8b6914; }
+.macro-meter-bar.thirst { background: #2a6a7a; }
+.macro-meter-bar.exhaust { background: #5a4a7a; }
+
+/* Despairing condition indicator */
+.condition-despairing {
+    color: var(--danger);
+    font-style: italic;
+    font-size: 0.85em;
+}
+
+/* === NOTIFY (Chapel notify macro) === */
+
+#notify {
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    background: var(--bg-surface);
+    border-left: 3px solid var(--accent);
+    color: var(--text);
+    padding: 0.6rem 1rem;
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    max-width: 320px;
+    z-index: 100;
+}
+
+/* === DEBUG PANEL === */
+
+#debug-panel {
+    margin-top: 3rem;
+    border: 1px solid var(--border);
+    background: var(--bg-mid);
+}
+
+#debug-panel summary {
+    font-family: var(--font-mono);
+    font-size: 0.7em;
+    color: var(--text-dim);
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+#debug-panel pre {
+    font-family: var(--font-mono);
+    font-size: 0.7em;
+    color: var(--text-dim);
+    padding: 0.5rem 0.6rem;
+    margin: 0;
+    border-top: 1px solid var(--border);
+    white-space: pre-wrap;
+}
+
+/* === BOOK READING (stub, Day 2) === */
+
+.book-page {
+    font-family: var(--font-mono);
+    font-size: 0.78em;
+    line-height: 1.5;
+    color: var(--text-dim);
+    background: var(--bg-surface);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+
+/* Coherent fragment highlight — for proximity signal hits */
+.coherent-fragment {
+    color: var(--text);
+    background: rgba(74, 124, 89, 0.15);
+    border-bottom: 1px solid var(--found);
+}
+
+/* === TRANSITIONS === */
+
+.passage {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* === RESPONSIVE === */
+
+@media (max-width: 768px) {
+    #passages { margin-left: 0; }
+    .passage { padding: 1.5rem 1rem 4rem; }
+}

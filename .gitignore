@@ -7,6 +7,13 @@ dist/
 # macOS
 .DS_Store
 
+# Claude Code
+.claude/
+.mcp.json
+
+# Source material (not redistributable)
+*.epub
+
 # VDD workflow artifacts
 .chainlink/
 reviews/

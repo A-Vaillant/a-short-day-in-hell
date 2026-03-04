@@ -1,0 +1,14 @@
+:: Shelf Stub
+<p>[Shelf mode — not yet implemented]</p>
+[[Back to corridor|Corridor]]
+
+::Chasm Stub
+<p>[Chasm — not yet implemented]</p>
+[[Back|Corridor]]
+
+::Wait Stub
+<<goto "Corridor">>
+
+::Sleep Stub
+<p>[Sleep — not yet implemented]</p>
+[[Back|Corridor]]

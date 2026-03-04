@@ -1,0 +1,14 @@
+::Debug Panel
+<<if $debug>>
+<details id="debug-panel" open>
+  <summary>DEBUG</summary>
+  <pre>
+Seed:     <<print $seed>>
+Side:     <<print $side === 0 ? "west" : "east">>
+Position: <<print $position>>
+Floor:    <<print $floor>>
+Mode:     <<print $mode>>
+<<print setup.Library.debugSegment($side, $position, $floor)>>
+  </pre>
+</details>
+<</if>>
