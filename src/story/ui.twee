@@ -12,10 +12,9 @@
 ]>>
 <<for _st range _stats>>
 <<set _sev = setup.Survival.severity(_st.val)>>
-<div class="stat-row">
-  <span class="stat-label <<print _sev === 'critical' ? 'stat-critical' : _sev === 'low' ? 'stat-low' : ''>>"><<print _st.label>></span>
-  <div class="meter-track"><div class="meter-fill <<print _st.cls>>" style="width:<<print Math.max(0, Math.min(100, _st.val))>>%"></div></div>
-</div>
+<<set _sevCls = _sev === 'critical' ? 'stat-critical' : _sev === 'low' ? 'stat-low' : ''>>
+<<set _pct = Math.max(0, Math.min(100, _st.val))>>
+<<print '<div class="stat-row"><span class="stat-label ' + _sevCls + '">' + _st.label + '</span><div class="meter-track"><div class="meter-fill ' + _st.cls + '" style="width:' + _pct + '%"></div></div></div>'>>
 <</for>>
 <<if $heldBook !== null>>
 <div class="sidebar-held">holding book</div>
@@ -37,10 +36,11 @@ Tick:     <<print $tick>> / 240  (<<print setup.Tick.getTimeString()>>)
 Day:      <<print $day>>
 Lights:   <<print $lightsOn ? "on" : "OFF">>
 <<print setup.Library.debugSegment($side, $position, $floor)>>
-Hunger:    <<print Math.floor($hunger)>>
-Thirst:    <<print Math.floor($thirst)>>
-Exhaustion:<<print Math.floor($exhaustion)>>
-Morale:    <<print Math.floor($morale)>>
+Hunger:    <<print $hunger.toFixed(2)>>
+Thirst:    <<print $thirst.toFixed(2)>>
+Exhaustion:<<print $exhaustion.toFixed(2)>>
+Morale:    <<print $morale.toFixed(2)>>
+Mortality: <<print $mortality.toFixed(2)>>
 Despairing:<<print $despairing>>
   </pre>
 </details>
