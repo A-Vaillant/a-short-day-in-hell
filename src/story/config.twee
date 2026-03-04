@@ -21,6 +21,7 @@ A Short Stay in Hell
     State.variables.position = 0;
     State.variables.floor    = 10;
     State.variables.mode        = "explore";
+    State.variables.move        = "";
     State.variables.heldBook    = null;
     State.variables.shelfOffset = 0;
     State.variables.openBook    = null;

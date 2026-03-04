@@ -255,21 +255,6 @@ button:disabled {
     font-size: 0.9em;
 }
 
-/* === NOTIFY (Chapel notify macro) === */
-
-#notify {
-    font-family: var(--font-mono);
-    font-size: 0.8em;
-    background: var(--bg-surface);
-    border-left: 3px solid var(--accent);
-    color: var(--text);
-    padding: 0.6rem 1rem;
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    max-width: 320px;
-    z-index: 100;
-}
 
 /* === DEBUG PANEL === */
 

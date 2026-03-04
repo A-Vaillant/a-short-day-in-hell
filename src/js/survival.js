@@ -20,7 +20,7 @@
         /** Apply a move/wait tick. Mutates State.variables in place. */
         onMove() {
             const v = State.variables;
-            const next = core.applyMove({
+            const next = core.tickMove({
                 hunger: v.hunger, thirst: v.thirst,
                 exhaustion: v.exhaustion, morale: v.morale, despairing: v.despairing,
             });

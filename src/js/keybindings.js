@@ -102,7 +102,7 @@
             if (key === "Escape") {
                 ev.preventDefault();
                 State.variables.mode = "explore";
-                Engine.play("Gallery");
+                Engine.play("Corridor");
             }
         }
     });

@@ -23,27 +23,22 @@
 <<include "Debug Panel">>
 </div>
 
-::Corridor Move Left
-<<script>>setup.Survival.onMove();<</script>>
-<<set _dest = setup.Library.applyMove({ side: $side, position: $position, floor: $floor }, "left")>>
-<<set $side = _dest.side, $position = _dest.position, $floor = _dest.floor>><<goto "Corridor">>
+::Corridor Move Left [nohistory]
+<<set $move = "left">><<goto "Corridor Do Move">>
 
-::Corridor Move Right
-<<script>>setup.Survival.onMove();<</script>>
-<<set _dest = setup.Library.applyMove({ side: $side, position: $position, floor: $floor }, "right")>>
-<<set $side = _dest.side, $position = _dest.position, $floor = _dest.floor>><<goto "Corridor">>
+::Corridor Move Right [nohistory]
+<<set $move = "right">><<goto "Corridor Do Move">>
 
-::Corridor Move Up
-<<script>>setup.Survival.onMove();<</script>>
-<<set _dest = setup.Library.applyMove({ side: $side, position: $position, floor: $floor }, "up")>>
-<<set $side = _dest.side, $position = _dest.position, $floor = _dest.floor>><<goto "Corridor">>
+::Corridor Move Up [nohistory]
+<<set $move = "up">><<goto "Corridor Do Move">>
 
-::Corridor Move Down
-<<script>>setup.Survival.onMove();<</script>>
-<<set _dest = setup.Library.applyMove({ side: $side, position: $position, floor: $floor }, "down")>>
-<<set $side = _dest.side, $position = _dest.position, $floor = _dest.floor>><<goto "Corridor">>
+::Corridor Move Down [nohistory]
+<<set $move = "down">><<goto "Corridor Do Move">>
 
-::Corridor Move Cross
+::Corridor Move Cross [nohistory]
+<<set $move = "cross">><<goto "Corridor Do Move">>
+
+::Corridor Do Move [nohistory]
 <<script>>setup.Survival.onMove();<</script>>
-<<set _dest = setup.Library.applyMove({ side: $side, position: $position, floor: $floor }, "cross")>>
-<<set $side = _dest.side, $position = _dest.position, $floor = _dest.floor>><<goto "Corridor">>
+<<set _dest = setup.Library.applyMove({ side: $side, position: $position, floor: $floor }, $move)>>
+<<set $side = _dest.side>><<set $position = _dest.position>><<set $floor = _dest.floor>><<goto "Corridor">>
