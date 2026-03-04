@@ -110,4 +110,42 @@
         DIRS, BOTTOM_FLOOR, SEGMENT_BOOK_COUNT,
         locationKey, generateSegment, availableMoves, applyMove, describeLocation,
     };
+
+    // ---- BookCore ----
+
+    const PAGES_PER_BOOK = 410;
+    const LINES_PER_PAGE = 40;
+    const CHARS_PER_LINE = 80;
+    const CHARS_PER_PAGE = LINES_PER_PAGE * CHARS_PER_LINE;
+    const CHARS_PER_BOOK = PAGES_PER_BOOK * CHARS_PER_PAGE;
+    const CHARSET = Array.from({ length: 95 }, (_, i) => String.fromCharCode(i + 32)).join("");
+
+    function generateBookPage(side, position, floor, bookIndex, pageIndex, forkRng) {
+        const rng = forkRng(`book:${side}:${position}:${floor}:${bookIndex}:p${pageIndex}`);
+        const n = CHARSET.length;
+        const lines = [];
+        for (let l = 0; l < LINES_PER_PAGE; l++) {
+            let line = "";
+            for (let c = 0; c < CHARS_PER_LINE; c++) {
+                line += CHARSET[rng.nextInt(n)];
+            }
+            lines.push(line);
+        }
+        return lines.join("\n");
+    }
+
+    function bookMeta(side, position, floor, bookIndex) {
+        return { side, position, floor, bookIndex };
+    }
+
+    function findCoherentFragment(pageText) {
+        const match = pageText.match(/[a-zA-Z ,.'!?\-]{4,}/g);
+        if (!match) return null;
+        return match.reduce((best, s) => s.length > best.length ? s : best, "");
+    }
+
+    window._BookCore = {
+        PAGES_PER_BOOK, LINES_PER_PAGE, CHARS_PER_LINE, CHARS_PER_PAGE, CHARS_PER_BOOK, CHARSET,
+        generateBookPage, bookMeta, findCoherentFragment,
+    };
 }());

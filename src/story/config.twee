@@ -20,8 +20,12 @@ A Short Stay in Hell
     State.variables.side     = 0;
     State.variables.position = 0;
     State.variables.floor    = 10;
-    State.variables.mode     = "explore";
-    State.variables.debug    = true;
+    State.variables.mode        = "explore";
+    State.variables.heldBook    = null;
+    State.variables.shelfOffset = 0;
+    State.variables.openBook    = null;
+    State.variables.openPage    = 0;
+    State.variables.debug       = true;
 })();
 <</script>>
 

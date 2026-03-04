@@ -15,7 +15,7 @@
 <<if _moves.includes("down")>><span data-move="down">[[↓ Down|Corridor Move Down]]</span> <</if>>
 <<if _moves.includes("cross")>><span data-move="cross">[[⇌ Cross|Corridor Move Cross]]</span><</if>>
 </div>
-<div id="actions">[[Look at shelves|Shelf Stub]] | [[Wait|Wait Stub]] | [[Sleep|Sleep Stub]] | [[Jump|Chasm Stub]]</div>
+<div id="actions">[[Look at shelves|Shelf Browse]] | [[Wait|Wait Stub]] | [[Sleep|Sleep Stub]] | [[Jump|Chasm Stub]]</div>
 <<include "Debug Panel">>
 </div>
 

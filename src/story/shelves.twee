@@ -1,0 +1,69 @@
+::Shelf Browse
+/* Show 10 books from the current segment. Player can open one, or go back. */
+<<set $mode = "shelf">>
+<<set _TOTAL = 640>>
+<<set _PAGE_SIZE = 10>>
+<div id="shelf-view" class="mode-shelf">
+
+<p class="location-header">Shelves — <<print setup.Library.describeLocation({ side: $side, position: $position, floor: $floor })>></p>
+
+<p>You face the shelves. Calfskin spines, gilded edges — each book identical on the outside. You reach for one.</p>
+
+<<if $heldBook !== null>>
+<p class="held-notice">You are holding a book from <<print $heldBook.side === 0 ? "west" : "east">> corridor, segment <<print $heldBook.position>>, floor <<print $heldBook.floor>>, book #<<print $heldBook.bookIndex + 1>>. You can put it back or keep it.</p>
+<</if>>
+
+<p><em>Books <<print $shelfOffset + 1>>–<<print Math.min($shelfOffset + _PAGE_SIZE, _TOTAL)>> of <<print _TOTAL>> in this segment.</em></p>
+
+<ul class="book-list">
+<<for _bi = $shelfOffset; _bi < Math.min($shelfOffset + _PAGE_SIZE, _TOTAL); _bi++>>
+  <li>Book #<<print _bi + 1>>
+    <<set _isHeld = $heldBook !== null && $heldBook.side === $side && $heldBook.position === $position && $heldBook.floor === $floor && $heldBook.bookIndex === _bi>>
+    <<if _isHeld>> <em>(in your hands)</em><</if>>
+    — [[Open|Shelf Open Book][$openBook = { side: $side, position: $position, floor: $floor, bookIndex: _bi }, $openPage = 0]]
+  </li>
+<</for>>
+</ul>
+
+<div id="shelf-nav">
+  <<if $shelfOffset > 0>>[[← Earlier books|Shelf Browse][$shelfOffset -= _PAGE_SIZE]]  <</if>>
+  <<if $shelfOffset + _PAGE_SIZE < _TOTAL>>[[Later books →|Shelf Browse][$shelfOffset += _PAGE_SIZE]]<</if>>
+</div>
+
+[[← Back to corridor|Corridor][$mode = "explore"]]
+</div>
+
+::Shelf Open Book
+/* Display one page of an open book. */
+<<set _book = $openBook>>
+<<set _page = $openPage>>
+<<set _pageText = setup.Book.getPage(_book.side, _book.position, _book.floor, _book.bookIndex, _page)>>
+<<set _fragment = setup.Book.findCoherentFragment(_pageText)>>
+<<set _isHeld = $heldBook !== null && $heldBook.side === _book.side && $heldBook.position === _book.position && $heldBook.floor === _book.floor && $heldBook.bookIndex === _book.bookIndex>>
+<div id="book-view" class="mode-book">
+
+<p class="location-header">Book #<<print _book.bookIndex + 1>> — Page <<print _page + 1>> / <<print setup.Book.PAGES_PER_BOOK>></p>
+<p><em><<print _book.side === 0 ? "West" : "East">> corridor, segment <<print _book.position>>, floor <<print _book.floor>></em></p>
+
+<pre class="book-page"><<print _pageText>></pre>
+
+<<if _fragment !== null && _fragment.length > 6>>
+<p class="coherent-fragment">You notice something legible: <em>"<<print _fragment.trim()>>"</em></p>
+<</if>>
+
+<div id="page-nav">
+  <<if _page > 0>>[[◀ Prev page|Shelf Open Book][$openPage -= 1]]  <</if>>
+  <<if _page < setup.Book.PAGES_PER_BOOK - 1>>[[Next page ▶|Shelf Open Book][$openPage += 1]]<</if>>
+</div>
+
+<div id="book-actions">
+  <<if _isHeld>>
+    [[Put book back on shelf|Shelf Browse][$heldBook = null]]
+  <<else>>
+    [[Take this book|Shelf Browse][$heldBook = { side: _book.side, position: _book.position, floor: _book.floor, bookIndex: _book.bookIndex }]]
+  <</if>>
+  | [[Back to shelf list|Shelf Browse]]
+  | [[Back to corridor|Corridor][$mode = "explore"]]
+</div>
+
+</div>
