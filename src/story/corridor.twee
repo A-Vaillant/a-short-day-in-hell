@@ -8,7 +8,44 @@
 <<if _seg.lightLevel === "dim">><p class="dim-notice">The lights flicker here. Something hums in the walls.</p><</if>>
 <<if _warnings.length > 0>><p class="warnings"><<for _w range _warnings>><<print _w>> <</for>></p><</if>>
 <p>A long corridor. The shelves recede in both directions until perspective fails. On your left, a railing over the chasm. On your right, books — floor to ceiling, each identical in binding, each filled with noise.</p>
-<<if _seg.restArea>><p class="feature">A rest area is here: clock, kiosk, bedroom. Stairs lead up<<if $floor > 0>> and down<</if>>.</p><</if>>
+<<if _seg.restArea>><p class="feature">A rest area is here: clock, kiosk, bedroom. Stairs lead up<<if $floor > 0>> and down<</if>>.</p>
+<<else>>
+<<script>>
+postdisplay["corridorGrid"] = function () {
+    delete postdisplay["corridorGrid"];
+    var v = State.variables;
+    var COUNT = 192;
+    var grid = document.createElement("div");
+    grid.className = "shelf-grid";
+    for (var bi = 0; bi < COUNT; bi++) {
+        var isHeld = v.heldBook !== null && v.heldBook.side === v.side &&
+            v.heldBook.position === v.position && v.heldBook.floor === v.floor &&
+            v.heldBook.bookIndex === bi;
+        var isTarget = v.targetBook.side === v.side &&
+            v.targetBook.position === v.position && v.targetBook.floor === v.floor &&
+            v.targetBook.bookIndex === bi;
+        var rng = setup.PRNG.fork("spine:" + v.side + ":" + v.position + ":" + v.floor + ":" + bi);
+        var h = Math.floor(rng.next() * 30);
+        var s = 15 + Math.floor(rng.next() * 20);
+        var l = 12 + Math.floor(rng.next() * 14);
+        var spine = document.createElement("div");
+        spine.className = "book-spine" + (isHeld ? " held" : "") + (isTarget ? " target-nearby" : "");
+        spine.style.background = "hsl(" + h + "," + s + "%," + l + "%)";
+        spine.addEventListener("click", (function (idx) {
+            return function () {
+                State.variables.openBook = { side: v.side, position: v.position, floor: v.floor, bookIndex: idx };
+                State.variables.openPage = 0;
+                Engine.play("Shelf Open Book");
+            };
+        })(bi));
+        grid.appendChild(spine);
+    }
+    var container = document.getElementById("corridor-grid");
+    if (container) container.appendChild(grid);
+};
+<</script>>
+<div id="corridor-grid"></div>
+<</if>>
 <<if _seg.hasBridge>><p class="feature">The chasm narrows here. A bridge connects to the other side.</p><</if>>
 <div id="moves"><strong>Move:</strong>
 <<if _moves.includes("left")>><span data-move="left"><<link "← Left" "Corridor">><<run setup.doMove("left")>><</link>></span> <</if>>
