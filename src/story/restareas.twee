@@ -77,7 +77,6 @@ Submissions: <<print $submissionsAttempted>></em></p>
 
 ::Life Story
 /* Shown at start of game */
-<<set $mode = "lifestory">>
 <div id="lifestory-view">
 <<print setup.LifeStory.format($lifeStory)>>
 <hr>

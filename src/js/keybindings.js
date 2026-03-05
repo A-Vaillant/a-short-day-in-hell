@@ -1,26 +1,29 @@
 /* Keybindings — vim-style navigation + game actions.
  *
- * Exploration mode (mode === "explore"):
+ * Keys are dispatched based on the current passage, not a mode variable.
+ *
+ * Corridor / general:
  *   h / ArrowLeft  → left
  *   l / ArrowRight → right
  *   k / ArrowUp    → up (stairs)
  *   j / ArrowDown  → down (stairs)
- *   (y/u/b/n unused for now — no diagonals in this geometry)
- *   .            → wait
- *   r            → read/interact (open shelf mode)
- *   i            → inventory/status (stub)
- *   z            → sleep/rest (stub)
- *   J            → jump into chasm
- *   K            → try to get back
- *   ~            → toggle debug panel
+ *   x              → cross bridge
+ *   .              → wait
+ *   r              → read/interact (open shelves)
+ *   z              → sleep/rest (stub)
+ *   J              → jump into chasm
+ *   `              → toggle debug panel
  *
- * Shelf mode (mode === "shelf"):
- *   Esc          → back to corridor
+ * Shelf Browse:
+ *   Esc            → back to corridor
  *
- * Book open (mode === "shelf", openBook set):
- *   h / ArrowLeft  → previous spread
- *   l / ArrowRight → next spread
+ * Shelf Open Book:
+ *   h / ArrowLeft  → previous page
+ *   l / ArrowRight → next page
  *   Esc / q        → back to shelf browse
+ *
+ * Life Story:
+ *   e              → continue to corridor
  */
 
 (function () {
@@ -31,15 +34,9 @@
         "l": "right", "ArrowRight": "right",
         "k": "up",    "ArrowUp":    "up",
         "j": "down",  "ArrowDown":  "down",
-        "x": "cross",  // cross bridge
+        "x": "cross",
     };
 
-    function getMode() {
-        return State.variables.mode || "explore";
-    }
-
-    // Mutates state for a move action. Returns true if move was valid.
-    // Callers are responsible for navigation (Engine.play or <<goto>>).
     setup.doMove = function (dir) {
         const loc = {
             side:     State.variables.side,
@@ -57,89 +54,67 @@
     };
 
     $(document).on("keydown.hell", function (ev) {
-        // Don't capture inside inputs
         if (ev.target.tagName === "INPUT" || ev.target.tagName === "TEXTAREA") return;
 
-        const mode = getMode();
+        const passage = State.passage;
         const key = ev.key;
+        const v = State.variables;
 
-        if (mode === "explore") {
-            if (Object.prototype.hasOwnProperty.call(VI_MOVE, key)) {
-                ev.preventDefault();
-                if (setup.doMove(VI_MOVE[key])) Engine.play("Corridor");
-                return;
-            }
+        if (passage === "Shelf Open Book") {
             switch (key) {
-                case ".":
+                case "h": case "ArrowLeft":
                     ev.preventDefault();
-                    Engine.play("Wait Stub");
-                    break;
-                case "r":
+                    if (v.openPage > 0) {
+                        v.openPage -= 1;
+                        Engine.play("Shelf Open Book");
+                    }
+                    return;
+                case "l": case "ArrowRight":
                     ev.preventDefault();
-                    Engine.play("Shelf Browse");
-                    break;
-                case "i":
+                    if (v.openPage < 411) {
+                        v.openPage += 1;
+                        Engine.play("Shelf Open Book");
+                    }
+                    return;
+                case "Escape": case "q":
                     ev.preventDefault();
-                    Engine.play("Shelf Stub"); // stub
-                    break;
-                case "z":
-                    ev.preventDefault();
-                    Engine.play("Wait Stub"); // stub
-                    break;
-                case "J":
-                    ev.preventDefault();
-                    Engine.play("Chasm Stub");
-                    break;
-                case "K":
-                    ev.preventDefault();
-                    Engine.play("Corridor"); // stub: "try to get back"
-                    break;
-                case "~":
-                case "`":
-                    ev.preventDefault();
-                    State.variables.debug = !State.variables.debug;
+                    v.openBook = null;
                     Engine.play("Corridor");
-                    break;
+                    return;
             }
-        } else if (mode === "lifestory") {
+        } else if (passage === "Life Story") {
             if (key === "e" || key === "E") {
                 ev.preventDefault();
-                State.variables.mode = "explore";
                 Engine.play("Corridor");
+                return;
             }
-        } else if (mode === "shelf") {
-            var v = State.variables;
-            if (v.openBook !== null) {
-                // Book is open — page flip and close
-                switch (key) {
-                    case "h": case "ArrowLeft":
-                        ev.preventDefault();
-                        if (v.openPage > 0) {
-                            v.openPage -= 1;
-                            Engine.play("Shelf Open Book");
-                        }
-                        break;
-                    case "l": case "ArrowRight":
-                        ev.preventDefault();
-                        if (v.openPage < 207) {
-                            v.openPage += 1;
-                            Engine.play("Shelf Open Book");
-                        }
-                        break;
-                    case "Escape": case "q":
-                        ev.preventDefault();
-                        v.openBook = null;
-                        Engine.play("Shelf Browse");
-                        break;
-                }
-            } else {
-                // Shelf browse
-                if (key === "Escape") {
-                    ev.preventDefault();
-                    v.mode = "explore";
-                    Engine.play("Corridor");
-                }
-            }
+        }
+
+        // Corridor and general navigation (any passage not handled above)
+        if (Object.prototype.hasOwnProperty.call(VI_MOVE, key)) {
+            ev.preventDefault();
+            if (setup.doMove(VI_MOVE[key])) Engine.play("Corridor");
+            return;
+        }
+        switch (key) {
+            case ".":
+                ev.preventDefault();
+                Engine.play("Wait Stub");
+                break;
+            case "z":
+                ev.preventDefault();
+                Engine.play("Wait Stub");
+                break;
+            case "J":
+                ev.preventDefault();
+                Engine.play("Chasm Stub");
+                break;
+            case "~":
+            case "`":
+                ev.preventDefault();
+                v.debug = !v.debug;
+                Engine.play(passage);
+                break;
         }
     });
 }());

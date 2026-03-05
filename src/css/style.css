@@ -72,9 +72,11 @@ button:disabled {
 /* === SUGARCUBE UI CHROME === */
 
 #ui-bar {
+    width: 12em;
     background-color: var(--bg-mid);
     border-right: 1px solid var(--border);
 }
+#story { margin-left: 12em; }
 #ui-bar-body { color: var(--text-dim); }
 #ui-bar hr { border-color: var(--border); }
 
@@ -106,8 +108,6 @@ button:disabled {
 
 /* === PASSAGE AREA === */
 
-/* Remove story margin only for book view */
-#story:has(#book-view) { margin-inline: 0; }
 
 #passages {
     padding: 0;
@@ -333,18 +333,51 @@ button:disabled {
 /* Kill SugarCube <br> insertions inside book view */
 #book-view br { display: none; }
 
+/* === SINGLE PAGE VIEW === */
+
+.book-single {
+    font-family: var(--font-mono);
+    font-size: clamp(0.38em, 0.85vw, 0.62em);
+    line-height: 1.25;
+    color: #3a3228;
+    background: #d4c9a8;
+    padding: 1.5em 2em;
+    white-space: pre;
+    overflow: hidden;
+    margin: 0.5rem auto;
+    max-width: 87ch;
+    box-shadow: 2px 4px 16px rgba(0,0,0,0.6);
+    border-radius: 2px;
+    min-height: 20em;
+}
+
+.book-single.book-page-cover {
+    background: #6b4226;
+    color: #c8b89a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-body);
+    font-style: italic;
+    /* Match content page height: 40 lines × 1.25 line-height + 3em padding */
+    height: 53em;
+}
+
+.book-single.book-page-back {
+    background: #5a3820;
+}
+
+/* === TWO-PAGE SPREAD (disabled, kept for future use) === */
+
 .book-spread {
     display: flex;
     margin: 0.5rem 0;
     box-shadow: 2px 4px 16px rgba(0,0,0,0.6);
     /* Height: 40 lines × 1.25 line-height + 2.4em padding = 52.4em at book font-size */
     height: calc(var(--book-fs) * 52.4);
-    /* Sidebar = 17.5em ≈ 280px. Passage padding = 1rem = 16px. Spine = 3px.
-       Available = 100vw - 299px. Each page needs 80ch + 2em padding.
-       Two pages = 160ch + 4em. With monospace 1ch ≈ 0.6em → 160ch = 96em.
-       Total page area = 100em (96 text + 4 padding).
-       font-size = (100vw - 299px) / 100 */
-    --book-fs: calc((100vw - 299px) / 125);
+    /* Sidebar = 12em = 192px. Story margin = 2.5em = 40px. Padding = 16px.
+       Available = 100vw - 248px. Divisor tuned for ch/em ratio. */
+    --book-fs: calc((100vw - 248px) / 125);
 }
 
 .book-page-left,
