@@ -1,27 +1,27 @@
-/* SugarCube wrapper for library.core — registers setup.Library. */
+/* Library wrapper — registers window.Lib. */
 
 (function () {
     "use strict";
 
-    const core = window._LibraryCore;
+    var core = window._LibraryCore;
 
-    setup.Library = {
+    window.Lib = {
         _cache: {},
 
-        getSegment(side, position, floor) {
-            const key = core.locationKey({ side, position, floor });
+        getSegment: function (side, position, floor) {
+            var key = core.locationKey({ side: side, position: position, floor: floor });
             if (!this._cache[key]) {
                 this._cache[key] = core.generateSegment(
                     side, position, floor,
-                    k => setup.PRNG.fork(k)
+                    function (k) { return PRNG.fork(k); }
                 );
             }
             return this._cache[key];
         },
 
-        availableMoves(loc)     { return core.availableMoves(loc); },
-        applyMove(loc, dir)     { return core.applyMove(loc, dir); },
-        describeLocation(loc)   { return core.describeLocation(loc); },
+        availableMoves: function (loc)   { return core.availableMoves(loc); },
+        applyMove: function (loc, dir)   { return core.applyMove(loc, dir); },
+        describeLocation: function (loc) { return core.describeLocation(loc); },
 
         DIRS: core.DIRS,
         BOTTOM_FLOOR: core.BOTTOM_FLOOR,
@@ -29,15 +29,13 @@
         GALLERIES_PER_SEGMENT: core.GALLERIES_PER_SEGMENT,
         isRestArea: core.isRestArea,
 
-        debugSegment(side, position, floor) {
-            const s = this.getSegment(side, position, floor);
-            const moves = core.availableMoves({ side, position, floor });
-            return [
-                `Segment [side:${side}, pos:${position}, floor:${floor}]`,
-                `Light: ${s.lightLevel}`,
-                `Bridge: ${s.hasBridge}`,
-                `Available moves: ${moves.join(", ")}`,
-            ].join("\n");
+        debugSegment: function (side, position, floor) {
+            var s = this.getSegment(side, position, floor);
+            var moves = core.availableMoves({ side: side, position: position, floor: floor });
+            return "Segment [side:" + side + ", pos:" + position + ", floor:" + floor + "]\n" +
+                "Light: " + s.lightLevel + "\n" +
+                "Bridge: " + s.hasBridge + "\n" +
+                "Available moves: " + moves.join(", ");
         }
     };
 }());

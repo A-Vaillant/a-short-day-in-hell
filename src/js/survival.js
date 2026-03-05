@@ -1,58 +1,54 @@
-/* SugarCube wrapper for SurvivalCore — registers setup.Survival.
- * Reads/writes State.variables directly so stats persist in save state.
+/* Survival wrapper — registers window.Surv.
+ * Reads/writes window.state directly.
  */
 (function () {
     "use strict";
-    const core = window._SurvivalCore;
+    var core = window._SurvivalCore;
 
-    setup.Survival = {
-        /** Initialize stats on a new game (call from StoryInit). */
-        init() {
-            const d = core.defaultStats();
-            const v = State.variables;
-            v.hunger     = d.hunger;
-            v.thirst     = d.thirst;
-            v.exhaustion = d.exhaustion;
-            v.morale     = d.morale;
-            v.mortality  = d.mortality;
-            v.despairing = d.despairing;
-            v.dead       = d.dead;
+    window.Surv = {
+        init: function () {
+            var d = core.defaultStats();
+            state.hunger     = d.hunger;
+            state.thirst     = d.thirst;
+            state.exhaustion = d.exhaustion;
+            state.morale     = d.morale;
+            state.mortality  = d.mortality;
+            state.despairing = d.despairing;
+            state.dead       = d.dead;
         },
 
-        _statsFromVars() {
-            const v = State.variables;
+        _statsFromState: function () {
             return {
-                hunger: v.hunger, thirst: v.thirst, exhaustion: v.exhaustion,
-                morale: v.morale, mortality: v.mortality,
-                despairing: v.despairing, dead: v.dead,
+                hunger: state.hunger, thirst: state.thirst, exhaustion: state.exhaustion,
+                morale: state.morale, mortality: state.mortality,
+                despairing: state.despairing, dead: state.dead,
             };
         },
 
-        /** Apply a move/wait tick. Mutates State.variables in place. */
-        onMove() {
-            Object.assign(State.variables, core.applyMoveTick(this._statsFromVars()));
+        onMove: function () {
+            Object.assign(state, core.applyMoveTick(this._statsFromState()));
         },
 
-        /** Apply one sleep-hour. Mutates State.variables in place. */
-        onSleep() {
-            Object.assign(State.variables, core.applySleep(this._statsFromVars()));
+        onSleep: function () {
+            Object.assign(state, core.applySleep(this._statsFromState()));
         },
 
-        /** Restore all stats (resurrection at dawn). */
-        onResurrection() {
-            Object.assign(State.variables, core.defaultStats());
+        onResurrection: function () {
+            Object.assign(state, core.defaultStats());
         },
 
-        onEat()   { Object.assign(State.variables, core.applyEat(this._statsFromVars())); },
-        onDrink() { Object.assign(State.variables, core.applyDrink(this._statsFromVars())); },
+        onEat: function ()   { Object.assign(state, core.applyEat(this._statsFromState())); },
+        onDrink: function () { Object.assign(state, core.applyDrink(this._statsFromState())); },
 
-        severity(val) { return core.severity(val); },
-
-        showMortality() { return core.showMortality(this._statsFromVars()); },
-
-        /** Returns array of warning strings for current state. */
-        warnings() {
-            return core.getWarnings(this._statsFromVars());
+        severity: function (val) { return core.severity(val); },
+        showMortality: function () { return core.showMortality(this._statsFromState()); },
+        warnings: function () { return core.getWarnings(this._statsFromState()); },
+        describeRising: function (val) {
+            return core.describeFromTable(val, TEXT.stats.rising);
+        },
+        describeMorale: function (val) {
+            // Morale is inverted: 100=good, 0=bad. Invert so table works like rising.
+            return core.describeFromTable(100 - val, TEXT.stats.morale);
         },
     };
 }());

@@ -111,8 +111,6 @@ button:disabled {
 
 #passages {
     padding: 0;
-    display: flex;
-    justify-content: flex-start;
 }
 
 .passage {
@@ -202,86 +200,81 @@ button:disabled {
     border-top: 1px solid var(--border);
 }
 
-/* === SIDEBAR STATS (StoryCaption) === */
+/* === SIDEBAR STATS === */
 
 #sidebar-stats {
-    padding: 0.8rem 0.5rem 0;
+    padding: 0.6rem 0.6rem 0;
     font-family: var(--font-mono);
-    font-size: 0.72em;
+    font-size: 0.75em;
     color: var(--text-dim);
     border-top: 1px solid var(--border);
     margin-top: 0.5rem;
 }
 
-#time-display {
-    color: var(--text-dim);
-    letter-spacing: 0.08em;
-    margin-bottom: 0.5rem;
-}
-
-.lights-out-indicator {
-    color: #2a2018;  /* near-invisible dot when lights off */
-}
-
-.stat-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.45rem;
-}
-
-.stat-label {
-    width: 6em;
+.sb-time {
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    flex-shrink: 0;
     font-size: 0.9em;
 }
 
-.stat-label.stat-critical { color: #a03030; }
-.stat-label.stat-low      { color: #8b6914; }
-
-.meter-track {
-    flex: 1;
-    min-width: 0;
-    height: 4px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    overflow: hidden;
+.sb-clock {
+    color: var(--text-dim);
+    margin-bottom: 0.1rem;
 }
 
-.meter-fill {
-    height: 100%;
-    transition: width 0.3s ease;
-}
-.meter-fill.morale  { background: #4a6a9a; }
-.meter-fill.hunger  { background: #8b6914; }
-.meter-fill.thirst  { background: #2a6a7a; }
-.meter-fill.exhaust { background: #5a4a7a; }
-
-/* stat-critical for condition banners */
-.stat-critical { color: #9a2a2a; }
-
-/* Condition indicators */
-.condition-despairing {
+.sb-dark {
     color: var(--danger);
     font-style: italic;
-    font-size: 0.9em;
-    margin-bottom: 0.5rem;
 }
 
-.condition-mortality {
-    color: #9a2a2a;
+.sb-divider {
+    border-top: 1px solid var(--border);
+    margin: 0.5rem 0;
+}
+
+.sb-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.15rem 0;
+    line-height: 1.4;
+}
+
+.sb-label {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.sb-word {
+    text-align: right;
+}
+
+.sb-ok         { color: var(--text-dim); }
+.sb-low        { color: #8b6914; }
+.sb-critical   { color: #a05030; }
+.sb-max .sb-label,
+.sb-max .sb-word { color: #a03030; font-weight: bold; }
+
+.sb-condition {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.95em;
+    padding: 0.1rem 0;
+}
+
+.sb-dying {
+    color: #a03030;
     font-weight: bold;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.5rem;
 }
 
-.sidebar-held {
-    margin-top: 0.6rem;
+.sb-despairing {
+    color: var(--danger);
+    font-style: italic;
+}
+
+.sb-held {
     color: var(--text-dim);
     font-style: italic;
-    font-size: 0.9em;
+    padding: 0.1rem 0;
 }
 
 /* === NOTIFY (Chapel notify macro) === */
@@ -359,8 +352,10 @@ button:disabled {
     justify-content: center;
     font-family: var(--font-body);
     font-style: italic;
-    /* Match content page height: 40 lines × 1.25 line-height + 3em padding */
-    height: 53em;
+    font-size: 1.1em;
+    letter-spacing: 0.05em;
+    max-width: 40ch;
+    min-height: 30em;
 }
 
 .book-single.book-page-back {
@@ -501,6 +496,55 @@ button:disabled {
     border-bottom: none;
     color: transparent;
     user-select: none;
+}
+
+/* === EVENTS === */
+
+.event-text {
+    color: var(--text-dim);
+    font-style: italic;
+    border-left: 2px solid var(--accent-dim);
+    padding-left: 0.8em;
+    margin: 0.6rem 0;
+}
+
+/* === NPCs === */
+
+.npc-list {
+    margin: 0.8rem 0 0.4rem;
+}
+
+.npc-entry {
+    margin: 0.2rem 0;
+    font-size: 0.95em;
+}
+
+.npc-name {
+    color: var(--text);
+    cursor: pointer;
+    border-bottom: 1px dotted var(--text-dim);
+}
+
+.npc-disposition {
+    color: var(--text-dim);
+    font-size: 0.85em;
+    font-style: italic;
+}
+
+.npc-dead .npc-name {
+    color: var(--text-dim);
+    cursor: default;
+    border-bottom: none;
+}
+
+.npc-anxious .npc-name { color: #8b6914; }
+.npc-mad .npc-name { color: #9a2a2a; }
+.npc-catatonic .npc-name { color: var(--text-dim); }
+
+.npc-dialogue {
+    color: var(--text);
+    margin: 0.1rem 0 0.3rem 1em;
+    font-size: 0.9em;
 }
 
 /* === RESPONSIVE === */

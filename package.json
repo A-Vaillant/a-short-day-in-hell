@@ -7,5 +7,8 @@
     "test:browser": "bash test/browser.sh",
     "test:all": "node --test 'test/**/*.test.js'",
     "build": "bash build.sh"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }

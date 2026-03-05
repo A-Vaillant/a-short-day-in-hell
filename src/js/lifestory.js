@@ -1,9 +1,9 @@
-/* SugarCube wrapper for LifeStoryCore — registers setup.LifeStory. */
+/* LifeStory wrapper — registers window.LifeStory. */
 (function () {
     "use strict";
-    const core = window._LifeStoryCore;
-    setup.LifeStory = {
-        generate(seed) { return core.generateLifeStory(seed); },
-        format(story)  { return core.formatLifeStory(story); },
+    var core = window._LifeStoryCore;
+    window.LifeStory = {
+        generate: function (seed) { return core.generateLifeStory(seed); },
+        format: function (story)  { return core.formatLifeStory(story); },
     };
 }());

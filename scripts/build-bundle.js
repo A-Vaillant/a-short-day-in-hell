@@ -50,7 +50,8 @@ const CORES = [
         global: "_TickCore",
         exports: [
             "TICKS_PER_HOUR", "TICKS_PER_DAY", "LIGHTS_ON_TICKS",
-            "defaultTickState", "advanceTick", "isLightsOn",
+            "RESET_HOUR_TICK",
+            "defaultTickState", "advanceTick", "isLightsOn", "isResetHour",
             "tickToTimeString", "ticksUntilDawn", "hoursUntilDawn",
         ],
     },
@@ -61,6 +62,20 @@ const CORES = [
             "STAT_MAX", "STAT_MIN", "defaultStats", "applyMoveTick",
             "applySleep", "applyEat", "applyDrink",
             "severity", "getWarnings", "showMortality",
+            "describeFromTable",
+        ],
+    },
+    {
+        file:   "lib/events.core.js",
+        global: "_EventsCore",
+        exports: ["createDeck", "drawEvent"],
+    },
+    {
+        file:   "lib/npc.core.js",
+        global: "_NpcCore",
+        exports: [
+            "DISPOSITIONS", "spawnNPCs", "moveNPCs", "getNPCsAt",
+            "interactText", "deteriorate",
         ],
     },
 ];

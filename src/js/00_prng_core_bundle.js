@@ -364,6 +364,7 @@
     const DAY_START_HOUR  = 6;   // 6:00am
     const LIGHTS_OFF_HOUR = 22;  // 10:00pm
     const LIGHTS_ON_TICKS = (LIGHTS_OFF_HOUR - DAY_START_HOUR) * TICKS_PER_HOUR; // 160
+    const RESET_HOUR_TICK = TICKS_PER_DAY - TICKS_PER_HOUR; // 230 = 5:00 AM
 
     /** @returns {{ tick: number, day: number }} */
     function defaultTickState() {
@@ -395,19 +396,24 @@
         let remaining = n;
 
         while (remaining > 0) {
-            const dawnAt      = TICKS_PER_DAY   - cursor;
-            const lightsOutAt = LIGHTS_ON_TICKS - cursor; // negative when already past lights-out
+            const dawnAt      = TICKS_PER_DAY    - cursor;
+            const lightsOutAt = LIGHTS_ON_TICKS  - cursor;
+            const resetAt     = RESET_HOUR_TICK  - cursor;
 
             if (remaining < dawnAt) {
                 // Does not reach dawn this iteration
                 if (cursor < LIGHTS_ON_TICKS && remaining >= lightsOutAt) {
                     events.push("lightsOut");
                 }
+                if (cursor < RESET_HOUR_TICK && remaining >= resetAt) {
+                    events.push("resetHour");
+                }
                 cursor += remaining;
                 remaining = 0;
             } else {
                 // Reaches (or exactly hits) dawn
                 if (cursor < LIGHTS_ON_TICKS) events.push("lightsOut");
+                if (cursor < RESET_HOUR_TICK) events.push("resetHour");
                 events.push("dawn");
                 day += 1;
                 remaining -= dawnAt;
@@ -427,6 +433,14 @@
      */
     function isLightsOn(tick) {
         return tick < LIGHTS_ON_TICKS;
+    }
+
+    /**
+     * Whether the given tick falls within the reset hour (5:00–6:00 AM).
+     * During this hour sleep is enforced and the library resets.
+     */
+    function isResetHour(tick) {
+        return tick >= RESET_HOUR_TICK && tick < TICKS_PER_DAY;
     }
 
     /**
@@ -470,7 +484,7 @@
         return Math.ceil(ticksUntilDawn(tick) / TICKS_PER_HOUR);
     }
 
-    window._TickCore = { TICKS_PER_HOUR, TICKS_PER_DAY, LIGHTS_ON_TICKS, defaultTickState, advanceTick, isLightsOn, tickToTimeString, ticksUntilDawn, hoursUntilDawn };
+    window._TickCore = { TICKS_PER_HOUR, TICKS_PER_DAY, LIGHTS_ON_TICKS, RESET_HOUR_TICK, defaultTickState, advanceTick, isLightsOn, isResetHour, tickToTimeString, ticksUntilDawn, hoursUntilDawn };
 
     // ---- _SurvivalCore ----
 
@@ -633,5 +647,150 @@
         return stats.thirst >= STAT_MAX || stats.hunger >= STAT_MAX;
     }
 
-    window._SurvivalCore = { STAT_MAX, STAT_MIN, defaultStats, applyMoveTick, applySleep, applyEat, applyDrink, severity, getWarnings, showMortality };
+    /**
+     * Match a value against a threshold table.
+     * Table entries: [{ min, word, level }], checked in order (first match wins).
+     * For rising stats (hunger/thirst/exhaustion), higher = worse, use `min` as >=.
+     * For falling stats (morale), caller inverts before calling.
+     *
+     * @param {number} value
+     * @param {{ min: number, word: string, level: string }[]} table
+     * @returns {{ word: string, level: string }}
+     */
+    function describeFromTable(value, table) {
+        for (var i = 0; i < table.length; i++) {
+            if (value >= table[i].min) return { word: table[i].word, level: table[i].level };
+        }
+        // fallback: last entry
+        var last = table[table.length - 1];
+        return { word: last.word, level: last.level };
+    }
+
+    window._SurvivalCore = { STAT_MAX, STAT_MIN, defaultStats, applyMoveTick, applySleep, applyEat, applyDrink, severity, getWarnings, showMortality, describeFromTable };
+
+    // ---- _EventsCore ----
+
+    /** Draw probability per move. */
+    const DRAW_CHANCE = 0.2;
+    /** Fisher-Yates shuffle, returns new array. */
+    function shuffle(arr, rng) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(rng.next() * (i + 1));
+            const tmp = a[i];
+            a[i] = a[j];
+            a[j] = tmp;
+        }
+        return a;
+    }
+    /** Create a shuffled deck of indices for a given card count. */
+    function createDeck(cardCount, rng) {
+        const indices = Array.from({ length: cardCount }, (_, i) => i);
+        return shuffle(indices, rng);
+    }
+    /**
+     * Attempt to draw an event. Returns updated deck and drawn card (or null).
+     * Deck auto-refills when exhausted.
+     * Cards array is passed in — core module has no hardcoded text.
+     */
+    function drawEvent(deck, cards, rng) {
+        const roll = rng.next();
+        if (roll >= DRAW_CHANCE) {
+            return { deck, event: null };
+        }
+        let d = deck;
+        if (d.length === 0) {
+            d = createDeck(cards.length, rng);
+        }
+        const idx = d[d.length - 1];
+        return {
+            deck: d.slice(0, -1),
+            event: cards[idx],
+        };
+    }
+
+    window._EventsCore = { createDeck, drawEvent };
+
+    // ---- _NpcCore ----
+
+    const DISPOSITIONS = ["calm", "anxious", "mad", "catatonic"];
+    /** Box-Muller approximation via sum of 6 uniforms. */
+    function gaussianish(rng) {
+        let sum = 0;
+        for (let i = 0; i < 6; i++)
+            sum += rng.next();
+        return sum - 3;
+    }
+    /** Spawn NPCs near a player location. Names passed in from content. */
+    function spawnNPCs(playerLoc, count, names, rng) {
+        const npcs = [];
+        for (let i = 0; i < count; i++) {
+            const nameIdx = Math.floor(rng.next() * names.length);
+            const posDelta = Math.round(gaussianish(rng) * 20);
+            const floorDelta = Math.round(gaussianish(rng) * 5);
+            const floor = Math.max(0, playerLoc.floor + floorDelta);
+            npcs.push({
+                id: i,
+                name: names[nameIdx],
+                side: rng.next() < 0.5 ? 0 : 1,
+                position: playerLoc.position + posDelta,
+                floor,
+                disposition: "calm",
+                daysMet: 0,
+                lastSeenDay: 0,
+                alive: true,
+            });
+        }
+        return npcs;
+    }
+    /** Daily random walk for all living, non-catatonic NPCs. */
+    function moveNPCs(npcs, rng) {
+        return npcs.map(npc => {
+            if (!npc.alive || npc.disposition === "catatonic") {
+                return { ...npc };
+            }
+            const posDelta = Math.round((rng.next() - 0.5) * 10);
+            const floorDelta = rng.next() < 0.3 ? (rng.next() < 0.5 ? -1 : 1) : 0;
+            return {
+                ...npc,
+                position: npc.position + posDelta,
+                floor: Math.max(0, npc.floor + floorDelta),
+            };
+        });
+    }
+    /** Filter NPCs at a specific location. */
+    function getNPCsAt(npcs, side, position, floor) {
+        return npcs.filter(n => n.side === side && n.position === position && n.floor === floor);
+    }
+    /**
+     * Daily deterioration check. Chance of degrading increases with day count.
+     */
+    function deteriorate(npc, day, rng) {
+        if (!npc.alive)
+            return { ...npc };
+        const result = { ...npc };
+        const chance = Math.min(0.8, day / 100);
+        const roll = rng.next();
+        if (result.disposition === "catatonic") {
+            if (roll < chance * 0.3) {
+                result.alive = false;
+            }
+            return result;
+        }
+        if (roll < chance) {
+            const idx = DISPOSITIONS.indexOf(result.disposition);
+            if (idx < DISPOSITIONS.length - 1) {
+                result.disposition = DISPOSITIONS[idx + 1];
+            }
+        }
+        return result;
+    }
+    /** Get interaction text. Dialogue table passed in from content. */
+    function interactText(npc, dialogue, rng) {
+        const pool = npc.alive ? dialogue[npc.disposition] : dialogue.dead;
+        const idx = Math.floor(rng.next() * pool.length);
+        return pool[idx];
+    }
+
+    window._NpcCore = { DISPOSITIONS, spawnNPCs, moveNPCs, getNPCsAt, interactText, deteriorate };
 }());

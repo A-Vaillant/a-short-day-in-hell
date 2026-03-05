@@ -22,6 +22,16 @@ CHANGELOG.md
 reviews/
 *.review.md
 
+# Dependencies
+node_modules/
+package-lock.json
+
+# Screenshots
+screenshots/
+
+# Images (not yet finalized)
+src/img/
+
 # Test artifacts
 test/screenshots/
 

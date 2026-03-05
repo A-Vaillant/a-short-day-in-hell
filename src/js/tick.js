@@ -1,105 +1,85 @@
-/* SugarCube wrapper for TickCore — registers setup.Tick.
- * Reads/writes State.variables directly so time persists in save state.
+/* Tick wrapper — registers window.Tick.
+ * Reads/writes window.state directly.
  */
 (function () {
     "use strict";
-    const core = window._TickCore;
+    var core = window._TickCore;
 
-    setup.Tick = {
-        /** Initialize tick state on a new game (call from StoryInit). */
-        init() {
-            const d = core.defaultTickState();
-            const v = State.variables;
-            v.tick     = d.tick;
-            v.day      = d.day;
-            v.lightsOn = true;
+    window.Tick = {
+        init: function () {
+            var d = core.defaultTickState();
+            state.tick     = d.tick;
+            state.day      = d.day;
+            state.lightsOn = true;
         },
 
-        /**
-         * Advance time by n ticks. Fires boundary effects and returns the
-         * event list so callers can react (e.g. redirect to sleep passage).
-         *
-         * @param {number} n
-         * @returns {string[]} events — "lightsOut" | "dawn"
-         */
-        advance(n) {
-            const v = State.variables;
-            const { state, events } = core.advanceTick({ tick: v.tick, day: v.day }, n);
-            v.tick = state.tick;
-            v.day  = state.day;
-            v.lightsOn = core.isLightsOn(v.tick);
+        advance: function (n) {
+            var result = core.advanceTick({ tick: state.tick, day: state.day }, n);
+            state.tick = result.state.tick;
+            state.day  = result.state.day;
+            state.lightsOn = core.isLightsOn(state.tick);
 
-            if (events.includes("dawn") && v.dead) {
-                setup.Survival.onResurrection();
+            if (result.events.includes("resetHour")) {
+                // Close any open book — you're falling asleep
+                state.openBook = null;
+                state.openPage = 0;
+                // heldBook persists (you're touching it)
             }
 
+            if (result.events.includes("dawn")) {
+                if (state.dead) Surv.onResurrection();
+                if (typeof Npc !== "undefined") Npc.onDawn();
+            }
+
+            return result.events;
+        },
+
+        onMove: function () {
+            if (core.isResetHour(state.tick)) {
+                this.onForcedSleep();
+                return [];
+            }
+            var events = this.advance(1);
+            Surv.onMove();
+            if (typeof Events !== "undefined") Events.draw();
             return events;
         },
 
-        /**
-         * Advance one tick and apply a move action to survival stats.
-         * Returns events from tick advance.
-         */
-        onMove() {
-            const events = this.advance(1);
-            setup.Survival.onMove();
-            return events;
-        },
-
-        /**
-         * Sleep until rested (exhaustion = 100) or until lights-out,
-         * whichever comes first. Each sleep-hour costs TICKS_PER_HOUR ticks.
-         * Returns when done.
-         */
-        onSleep() {
-            const v = State.variables;
-            const TICKS_PER_HOUR = core.TICKS_PER_HOUR;
-            const LIGHTS_OFF     = core.LIGHTS_ON_TICKS;
-
-            while (v.exhaustion < 100 && v.tick < LIGHTS_OFF) {
-                this.advance(TICKS_PER_HOUR);
-                setup.Survival.onSleep();
+        onSleep: function () {
+            // Sleep hour-by-hour until reset hour
+            while (!core.isResetHour(state.tick)) {
+                this.advance(core.TICKS_PER_HOUR);
+                Surv.onSleep();
             }
-
-            // If lights just went out mid-sleep, finish the night
-            if (!v.lightsOn) {
+            // Reset hour: forced sleep through dawn
+            if (core.isResetHour(state.tick)) {
                 this.onForcedSleep();
             }
         },
 
-        /**
-         * Forced sleep: advance from lights-out to dawn, applying sleep-hour
-         * effects for each remaining hour of darkness.
-         */
-        onForcedSleep() {
-            const v = State.variables;
-            while (!v.lightsOn) {
-                const events = this.advance(core.TICKS_PER_HOUR);
-                setup.Survival.onSleep();
+        onForcedSleep: function () {
+            while (!state.lightsOn || core.isResetHour(state.tick)) {
+                var events = this.advance(core.TICKS_PER_HOUR);
+                Surv.onSleep();
                 if (events.includes("dawn")) break;
             }
         },
 
-        /** Current time as a display string, e.g. "10:40 PM". */
-        getTimeString() {
-            return core.tickToTimeString(State.variables.tick);
+        getTimeString: function () {
+            return core.tickToTimeString(state.tick);
         },
 
-        /** "Day N" display string. */
-        getDayDisplay() {
-            return "Day " + State.variables.day;
+        getDayDisplay: function () {
+            return "Day " + state.day;
         },
 
-        /** Whole hours remaining until dawn. */
-        hoursUntilDawn() {
-            return core.hoursUntilDawn(State.variables.tick);
+        hoursUntilDawn: function () {
+            return core.hoursUntilDawn(state.tick);
         },
 
-        /** Full clock line matching the text's format: "Year 0000000, Day N\nH:MM AM". */
-        getClockDisplay() {
-            const v = State.variables;
-            const year = String(v.day > 365 ? Math.floor(v.day / 365) : 0).padStart(7, "0");
-            return `Year ${year}, Day ${v.day}\n${core.tickToTimeString(v.tick)}`;
+        getClockDisplay: function () {
+            var year = String(state.day > 365 ? Math.floor(state.day / 365) : 0).padStart(7, "0");
+            return "Year " + year + ", Day " + state.day + "\n" + core.tickToTimeString(state.tick);
         },
     };
 }());

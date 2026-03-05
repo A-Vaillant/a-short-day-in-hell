@@ -1,128 +1,81 @@
-/* Debug API — only active when State.variables.debug === true.
- * Exposed as setup.Debug (SugarCube) and window.Debug (for shot-scraper/console).
- *
- * Usage from browser console or tests:
- *   Debug.goToBook(0, 5, 10, 42)   → teleport + open book 42 at west/seg5/floor10
- *   Debug.goToLocation(1, 3, 7)    → teleport to east corridor, seg 3, floor 7
- *   Debug.getBookKey()             → "0:5:10:42" (current open book coords)
- *   Debug.getLocation()            → { side, position, floor }
- *   Debug.openPage(n)              → jump to page n of current open book
- *   Debug.setSeed(s)               → re-seed PRNG and restart (full reload)
- */
+/* Debug API — window.Debug for console / shot-scraper use. */
 
 (function () {
     "use strict";
 
-    const api = {
-        goToLocation(side, position, floor) {
-            State.variables.side     = side;
-            State.variables.position = position;
-            State.variables.floor    = floor;
-            State.variables.mode     = "explore";
-            Engine.play("Corridor");
+    window.Debug = {
+        goToLocation: function (side, position, floor) {
+            state.side     = side;
+            state.position = position;
+            state.floor    = floor;
+            Engine.goto("Corridor");
         },
 
-        goToBook(side, position, floor, bookIndex) {
-            State.variables.side      = side;
-            State.variables.position  = position;
-            State.variables.floor     = floor;
-            State.variables.openBook  = { side, position, floor, bookIndex };
-            State.variables.openPage  = 0;
-            State.variables.mode      = "shelf";
-            Engine.play("Shelf Open Book");
+        goToBook: function (side, position, floor, bookIndex) {
+            state.side      = side;
+            state.position  = position;
+            state.floor     = floor;
+            state.openBook  = { side: side, position: position, floor: floor, bookIndex: bookIndex };
+            state.openPage  = 0;
+            Engine.goto("Shelf Open Book");
         },
 
-        openPage(n) {
-            if (!State.variables.openBook) return "no book open";
-            State.variables.openPage = n;
-            Engine.play("Shelf Open Book");
+        openPage: function (n) {
+            if (!state.openBook) return "no book open";
+            state.openPage = n;
+            Engine.goto("Shelf Open Book");
         },
 
-        getBookKey() {
-            const b = State.variables.openBook;
+        getBookKey: function () {
+            var b = state.openBook;
             if (!b) return null;
-            return `${b.side}:${b.position}:${b.floor}:${b.bookIndex}`;
+            return b.side + ":" + b.position + ":" + b.floor + ":" + b.bookIndex;
         },
 
-        getLocation() {
-            return {
-                side:     State.variables.side,
-                position: State.variables.position,
-                floor:    State.variables.floor,
-            };
+        getLocation: function () {
+            return { side: state.side, position: state.position, floor: state.floor };
         },
 
-        setSeed(seed) {
-            const url = new URL(window.location.href);
+        setSeed: function (seed) {
+            var url = new URL(window.location.href);
             url.searchParams.set("seed", String(seed));
             window.location.href = url.toString();
         },
 
-        // --- Time ---
-
-        /** Set the current tick (0–239) without advancing day. */
-        setTick(n) {
-            State.variables.tick     = Math.max(0, Math.min(239, n));
-            State.variables.lightsOn = State.variables.tick < 160;
-            Engine.play(passage());
+        setTick: function (n) {
+            state.tick     = Math.max(0, Math.min(239, n));
+            state.lightsOn = state.tick < 160;
+            Engine.goto(state.screen);
         },
 
-        /** Set the current day number. */
-        setDay(n) {
-            State.variables.day = Math.max(1, n);
-            Engine.play(passage());
+        setDay: function (n) {
+            state.day = Math.max(1, n);
+            Engine.goto(state.screen);
         },
 
-        /** Jump to just before lights-out (tick 155). */
-        nearLightsOut() {
-            this.setTick(155);
+        nearLightsOut: function () { this.setTick(155); },
+        nearDawn: function () { this.setTick(235); },
+
+        getTime: function () {
+            return { tick: state.tick, day: state.day, lightsOn: state.lightsOn };
         },
 
-        /** Jump to just before dawn (tick 235). */
-        nearDawn() {
-            this.setTick(235);
+        setStat: function (name, value) {
+            var allowed = ["hunger", "thirst", "exhaustion", "morale", "mortality"];
+            if (allowed.indexOf(name) === -1) return "unknown stat: " + name;
+            state[name] = Math.max(0, Math.min(100, value));
+            Engine.goto(state.screen);
         },
 
-        /** Get current time state. */
-        getTime() {
+        triggerParched: function () { this.setStat("thirst", 0); },
+        triggerStarving: function () { this.setStat("hunger", 0); },
+
+        getStats: function () {
             return {
-                tick:     State.variables.tick,
-                day:      State.variables.day,
-                lightsOn: State.variables.lightsOn,
-            };
-        },
-
-        // --- Survival ---
-
-        /** Set a survival stat by name. */
-        setStat(name, value) {
-            const allowed = ["hunger", "thirst", "exhaustion", "morale", "mortality"];
-            if (!allowed.includes(name)) return `unknown stat: ${name}`;
-            State.variables[name] = Math.max(0, Math.min(100, value));
-            Engine.play(passage());
-        },
-
-        /** Trigger Parched condition (thirst → 0). */
-        triggerParched() { this.setStat("thirst", 0); },
-
-        /** Trigger Starving condition (hunger → 0). */
-        triggerStarving() { this.setStat("hunger", 0); },
-
-        /** Get current survival stats. */
-        getStats() {
-            const v = State.variables;
-            return {
-                hunger:    v.hunger,
-                thirst:    v.thirst,
-                exhaustion: v.exhaustion,
-                morale:    v.morale,
-                mortality: v.mortality,
-                despairing: v.despairing,
-                dead:      v.dead,
+                hunger: state.hunger, thirst: state.thirst, exhaustion: state.exhaustion,
+                morale: state.morale, mortality: state.mortality,
+                despairing: state.despairing, dead: state.dead,
             };
         },
     };
-
-    setup.Debug = api;
-    window.Debug = api;
 }());

@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Compile TypeScript cores if any exist
+if compgen -G "lib/*.core.ts" > /dev/null; then
+    npx tsc
+fi
 node scripts/build-bundle.js
 mkdir -p dist
-TWEEGO_PATH=tweego/storyformats tweego/tweego -f sugarcube-2 -o dist/index.html src/story/ src/js/ src/css/
-echo "Built: dist/index.html"
+node scripts/build-vanilla.js
