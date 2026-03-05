@@ -51,6 +51,7 @@ postdisplay["shelfGrid"] = function () {
 
 ::Shelf Open Book
 <<if $openBook === null>><<goto "Shelf Browse">><</if>>
+<<set $mode = "shelf">>
 <<set _book = $openBook>>
 <<set _spread = $openPage>>
 <<set _maxSpread = 207>>

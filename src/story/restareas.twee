@@ -77,9 +77,10 @@ Submissions: <<print $submissionsAttempted>></em></p>
 
 ::Life Story
 /* Shown at start of game */
+<<set $mode = "lifestory">>
 <div id="lifestory-view">
 <<print setup.LifeStory.format($lifeStory)>>
 <hr>
 <p><em>Your book is somewhere on the <<print $targetBook.side === 0 ? "west" : "east">> side, floor <<print $targetBook.floor>>.</em></p>
-[[Begin|Corridor]]
+<p class="key-hint">[E] Continue</p>
 </div>

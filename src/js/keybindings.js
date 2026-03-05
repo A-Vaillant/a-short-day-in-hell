@@ -101,6 +101,12 @@
                     Engine.play("Corridor");
                     break;
             }
+        } else if (mode === "lifestory") {
+            if (key === "e" || key === "E") {
+                ev.preventDefault();
+                State.variables.mode = "explore";
+                Engine.play("Corridor");
+            }
         } else if (mode === "shelf") {
             var v = State.variables;
             if (v.openBook !== null) {
